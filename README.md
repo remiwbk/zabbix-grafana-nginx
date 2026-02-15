@@ -91,6 +91,16 @@ sudo docker run hello-world
 
 ------------------------------------------------------------------------
 
+## 📥 Cloner le projet
+
+Cloner le dépôt :
+
+```bash
+git clone https://github.com/remiwbk/zabbix-grafana-nginx.git
+```
+
+------------------------------------------------------------------------
+
 ## ⚙️ Configuration
 
 ### 1️⃣ Copier le fichier d'exemple
