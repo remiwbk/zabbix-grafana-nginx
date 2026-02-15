@@ -1,0 +1,182 @@
+# 📊 Monitoring Stack -- Zabbix + Grafana + NGINX
+
+Infrastructure de supervision basée sur :
+
+-   🐳 Docker\
+-   🗄 PostgreSQL\
+-   📡 Zabbix Server\
+-   📈 Grafana\
+-   🔐 NGINX Reverse Proxy (HTTPS)
+
+------------------------------------------------------------------------
+
+## 🎯 Objectif
+
+Déployer une stack de supervision :
+
+-   Portable\
+-   Versionnable\
+-   Paramétrable via `.env`\
+-   Adaptée à un environnement entreprise\
+-   Sans valeur sensible hardcodée
+
+------------------------------------------------------------------------
+
+## 🏗 Architecture
+
+``` mermaid
+flowchart LR
+
+    subgraph CLIENTS
+        AGENT[Zabbix Agents]
+    end
+
+    subgraph DMZ
+        NGINX[NGINX Reverse Proxy]
+    end
+
+    subgraph SERVERS
+        ZWEB[Zabbix Web]
+        ZSRV[Zabbix Server]
+        DB[(PostgreSQL)]
+        GRAFANA[Grafana]
+    end
+
+    AGENT -->|10050| ZSRV
+    ZSRV --> DB
+    ZWEB --> ZSRV
+    NGINX -->|HTTPS| ZWEB
+    NGINX -->|HTTPS| GRAFANA
+```
+
+------------------------------------------------------------------------
+
+## 📂 Structure du projet
+
+    .
+    ├── docker-compose.yml
+    ├── .env.example
+    └── reverse-proxy
+        ├── certs/
+        └── conf.d/
+            └── default.conf.template
+
+------------------------------------------------------------------------
+
+## 🐳 Installation de Docker (Debian)
+
+``` bash
+set -e
+
+sudo apt-get update
+sudo apt-get install -y ca-certificates curl gnupg lsb-release
+
+sudo mkdir -p /usr/share/keyrings
+curl -fsSL https://download.docker.com/linux/debian/gpg | \
+sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+echo \
+"deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] \
+https://download.docker.com/linux/debian $(lsb_release -cs) stable" | \
+sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+sudo apt-get update
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+
+sudo systemctl enable docker
+sudo systemctl start docker
+
+sudo docker run hello-world
+```
+
+------------------------------------------------------------------------
+
+## ⚙️ Configuration
+
+### 1️⃣ Copier le fichier d'exemple
+
+``` bash
+cp .env.example .env
+```
+
+Modifier les variables :
+
+``` env
+ZABBIX_DOMAIN=zabbix.red.home
+GRAFANA_DOMAIN=grafana.red.home
+CERT_NAME=zabbix
+HTTP_PORT=80
+HTTPS_PORT=443
+```
+
+------------------------------------------------------------------------
+
+### 2️⃣ Génération des certificats TLS (auto-signé)
+
+``` bash
+mkdir -p reverse-proxy/certs
+
+openssl req -x509 -nodes -days 365 \
+-newkey rsa:2048 \
+-keyout reverse-proxy/certs/zabbix.key \
+-out reverse-proxy/certs/zabbix.crt \
+-subj "/CN=zabbix.red.home"
+```
+
+Les fichiers doivent être :
+
+    reverse-proxy/certs/${CERT_NAME}.crt
+    reverse-proxy/certs/${CERT_NAME}.key
+
+------------------------------------------------------------------------
+
+### 3️⃣ Lancer la stack
+
+``` bash
+docker compose up -d
+```
+
+Vérifier :
+
+``` bash
+docker ps
+```
+
+------------------------------------------------------------------------
+
+## 🔐 Sécurité
+
+-   Reverse proxy HTTPS\
+-   Redirection HTTP → HTTPS\
+-   Paramétrage dynamique via `.env`\
+-   Aucune donnée sensible dans le dépôt
+
+------------------------------------------------------------------------
+
+## 📡 Ports utilisés
+
+  Service         Port
+  --------------- -------
+  Zabbix Server   10051
+  Zabbix Agent    10050
+  HTTP            80
+  HTTPS           443
+
+------------------------------------------------------------------------
+
+## 🚀 Améliorations possibles
+
+-   Provisioning automatique Grafana\
+-   Déploiement via Ansible\
+-   Infrastructure as Code (Terraform)\
+-   Let's Encrypt\
+-   Healthchecks Docker\
+-   Haute disponibilité
+
+------------------------------------------------------------------------
+
+## 👨‍💻 Auteur
+
+Projet réalisé dans le cadre d'une montée en compétence en
+administration système, supervision et industrialisation
+d'infrastructure.
