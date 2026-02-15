@@ -154,6 +154,19 @@ docker ps
 
 ------------------------------------------------------------------------
 
+## 🐳 Particularité Docker – IP du Zabbix Server
+
+Lorsque Zabbix Server est exécuté dans Docker, l’interface du host **Zabbix server** dans l’UI peut nécessiter l’IP interne du conteneur (réseau bridge Docker), et non `127.0.0.1` ni l’IP de la machine hôte.
+
+Vérifier l’IP interne :
+
+```bash
+docker inspect zabbix-server | grep IPAddress
+```
+⚠️ Cette IP peut changer si le conteneur est recréé.
+
+------------------------------------------------------------------------
+
 ## 🔐 Sécurité
 
 -   Reverse proxy HTTPS\
