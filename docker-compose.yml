@@ -11,7 +11,7 @@ services:
     restart: unless-stopped
 
   zabbix-server:
-    image: zabbix/zabbix-server-pgsql:6.0-lts
+    image: zabbix/zabbix-server-pgsql:latest
     container_name: zabbix-server
     env_file:
       - .env
@@ -30,7 +30,7 @@ services:
     restart: unless-stopped
 
   zabbix-web:
-    image: zabbix/zabbix-web-nginx-pgsql:6.0-lts
+    image: zabbix/zabbix-web-nginx-pgsql:latest
     container_name: zabbix-web
     env_file:
       - .env
@@ -45,7 +45,7 @@ services:
     restart: unless-stopped
 
   reverse-proxy:
-    image: nginx:1.25
+    image: nginx:latest
     container_name: zabbix-reverse-proxy
     volumes:
       - ./reverse-proxy/conf.d:/etc/nginx/conf.d
@@ -63,7 +63,7 @@ services:
     restart: unless-stopped
 
   grafana:
-    image: grafana/grafana:10.2
+    image: grafana/grafana:latest
     container_name: grafana
     env_file:
       - .env
