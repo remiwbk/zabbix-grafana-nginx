@@ -53,13 +53,14 @@ flowchart LR
 
 ## 📂 Structure du projet
 
-    .
-    ├── docker-compose.yml
-    ├── .env.example
-    └── reverse-proxy
-        ├── certs/
-        └── conf.d/
-            └── default.conf.template
+.
+├── docker-compose.yml
+├── README.md
+└── reverse-proxy
+    ├── certs
+    ├── conf.d
+    └── templates
+        └── default.conf
 
 ------------------------------------------------------------------------
 
@@ -118,6 +119,30 @@ CERT_NAME=zabbix
 HTTP_PORT=80
 HTTPS_PORT=443
 ```
+------------------------------------------------------------------------
+
+## 🧩 NGINX – Variables dynamiques avec envsubst
+
+NGINX ne lit pas directement les variables du `.env`.  
+Nous utilisons `envsubst` au démarrage du conteneur pour générer la configuration finale.
+
+### 📁 Structure
+
+```
+reverse-proxy/
+├── certs
+├── conf.d          # vide côté hôte
+└── templates
+    └── default.conf   # contient ${VARIABLE}
+```
+
+### 🔄 Fonctionnement
+
+- `templates/default.conf` → contient les variables `${...}`
+- `envsubst` remplace les variables au démarrage
+- Le fichier final est généré dans `/etc/nginx/conf.d/default.conf`
+
+⚠️ Ne pas placer de `default.conf` dans `conf.d/` côté hôte.
 
 ------------------------------------------------------------------------
 
